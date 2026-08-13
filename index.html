@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>YT Analyzer</title>
+  <meta name="description" content="Busca vídeos de YouTube y obtén un resumen y capítulos generados con IA." />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header id="app-header">
+      <div class="brand">
+        <span class="brand-icon" aria-hidden="true">🎬</span>
+        <h1>YT Analyzer</h1>
+      </div>
+      <form id="search-form" autocomplete="off">
+        <input id="search-input" type="search" placeholder="Buscar vídeos en YouTube…" aria-label="Buscar vídeos" />
+        <button type="submit" id="search-btn">Buscar</button>
+      </form>
+      <button id="settings-btn" type="button" title="Ajustes / claves de API" aria-label="Ajustes">⚙️</button>
+    </header>
+
+    <main id="results-view">
+      <p id="results-hint" class="hint">Introduce una búsqueda para ver resultados de YouTube.</p>
+      <p id="results-status" class="status" hidden></p>
+      <div id="results-grid" class="results-grid"></div>
+    </main>
+
+    <main id="video-view" hidden>
+      <button id="back-btn" type="button">← Volver a resultados</button>
+      <h2 id="video-title" class="video-title"></h2>
+
+      <div id="split-container" class="split-container">
+        <div id="video-pane" class="video-pane">
+          <div class="player-wrap" id="player-wrap"></div>
+        </div>
+
+        <div id="divider" class="divider" role="separator" aria-orientation="horizontal" aria-label="Redimensionar panel de vídeo" tabindex="0"></div>
+
+        <div id="content-pane" class="content-pane">
+          <section id="summary-section" class="panel-section">
+            <h3>Resumen</h3>
+            <p id="summary-text" class="summary-text">—</p>
+          </section>
+
+          <section id="chapters-section" class="panel-section">
+            <h3>Capítulos</h3>
+            <ul id="chapters-list" class="chapters-list"></ul>
+          </section>
+
+          <p id="analysis-status" class="status" hidden></p>
+        </div>
+      </div>
+    </main>
+
+    <dialog id="settings-dialog">
+      <form method="dialog" id="settings-form">
+        <h2>Ajustes</h2>
+        <p class="dialog-hint">
+          Estas claves se guardan solo en este navegador (localStorage) y se usan para llamar
+          directamente a las APIs de Google y Anthropic desde tu dispositivo. No se suben al repositorio.
+          Usa claves restringidas (por referrer HTTP) cuando puedas.
+        </p>
+
+        <label for="yt-key-input">Clave YouTube Data API v3</label>
+        <input id="yt-key-input" type="text" placeholder="AIza…" autocomplete="off" />
+        <p class="field-hint">
+          Créala en <a href="https://console.cloud.google.com/apis/credentials" target="_blank" rel="noopener">Google Cloud Console</a>,
+          habilita "YouTube Data API v3".
+        </p>
+
+        <label for="anthropic-key-input">Clave API de Anthropic (Claude)</label>
+        <input id="anthropic-key-input" type="text" placeholder="sk-ant-…" autocomplete="off" />
+        <p class="field-hint">
+          Créala en <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.
+        </p>
+
+        <label for="model-select">Modelo para resumen/capítulos</label>
+        <select id="model-select">
+          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (rápido y económico)</option>
+          <option value="claude-sonnet-5">Claude Sonnet 5 (más calidad)</option>
+        </select>
+
+        <label for="proxy-input">Proxy CORS (para leer subtítulos de YouTube)</label>
+        <input id="proxy-input" type="text" placeholder="https://api.allorigins.win/raw?url=" />
+        <p class="field-hint">
+          YouTube no permite leer subtítulos directamente desde el navegador (CORS), así que se usa
+          un proxy intermedio. Puedes cambiarlo por uno propio si lo prefieres.
+        </p>
+
+        <div class="dialog-actions">
+          <button type="button" id="settings-cancel">Cancelar</button>
+          <button type="submit" id="settings-save" value="save">Guardar</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
