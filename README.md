@@ -2,10 +2,13 @@
 
 Mini app web (HTML/CSS/JS, sin build, sin backend) para:
 
-1. Buscar vídeos de YouTube.
-2. Seleccionar uno y verlo en un reproductor pequeño con un panel divisor
-   **arrastrable** (vídeo arriba en vertical / a la izquierda en horizontal,
-   contenido al lado).
+1. Copiar el enlace de un vídeo de YouTube (desde la propia app de YouTube,
+   por ejemplo) y tocar un único botón para analizarlo — lee el portapapeles
+   automáticamente (con una casilla para pegarlo a mano si el navegador no
+   lo permite).
+2. Verlo en un reproductor pequeño con un panel divisor **arrastrable**
+   (vídeo arriba en vertical / a la izquierda en horizontal, contenido al
+   lado).
 3. Generar automáticamente:
    - Un **resumen corto** (un párrafo) del vídeo.
    - Una lista de **capítulos plegables**: al clicar uno se despliega su
@@ -17,7 +20,7 @@ Pensada para publicarse tal cual con **GitHub Pages** — no hay paso de compila
 
 Todo corre **en tu navegador**, no hay servidor propio:
 
-- **Búsqueda de vídeos** → [YouTube Data API v3](https://developers.google.com/youtube/v3).
+- **Datos del vídeo** (a partir del enlace pegado) → [YouTube Data API v3](https://developers.google.com/youtube/v3).
 - **Transcripción** → se leen los subtítulos que YouTube ya tiene publicados
   para el vídeo (manuales o autogenerados). YouTube no permite leer esto
   con CORS desde un dominio ajeno, así que si la petición directa falla se
@@ -30,6 +33,13 @@ Todo corre **en tu navegador**, no hay servidor propio:
 Las claves de API (YouTube y Gemini) se introducen una vez desde el
 icono ⚙️ y se guardan **solo en `localStorage` de tu navegador**. Nunca se
 suben al repositorio ni pasan por ningún servidor intermedio propio.
+
+### Limitación conocida: lectura automática del portapapeles
+
+La API `navigator.clipboard.readText()` que usa el botón principal solo
+funciona en un **contexto seguro** (la página servida por `https://`, o
+`http://localhost`) — abrir la app como archivo local no la permite, y el
+botón caerá automáticamente al formulario para pegar el enlace a mano.
 
 ### Limitación conocida: vídeos sin subtítulos
 
@@ -87,7 +97,7 @@ python3 -m http.server 8080
 index.html            Estructura de la app (resultados, vista de vídeo, ajustes)
 css/styles.css         Estilos (claro/oscuro automático, layout responsive)
 js/settings.js         Ajustes y claves de API (localStorage)
-js/youtube.js          Búsqueda y detalle de vídeos (YouTube Data API v3)
+js/youtube.js          Detalle de vídeo por ID + extracción de ID desde un enlace pegado
 js/transcript.js        Extracción de subtítulos/transcripción
 js/summarize.js         Resumen + capítulos vía API de Gemini
 js/player.js             Reproductor embebido (YouTube IFrame API) + seek

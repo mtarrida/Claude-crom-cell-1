@@ -1,4 +1,5 @@
-// Búsqueda y detalle de vídeos usando la YouTube Data API v3.
+// Detalle de un vídeo (por ID) usando la YouTube Data API v3, y extracción
+// del ID de vídeo a partir de un enlace (o ID) pegado por el usuario.
 
 const API_BASE = "https://www.googleapis.com/youtube/v3";
 
@@ -44,26 +45,8 @@ async function apiFetch(path, params, apiKey) {
   return res.json();
 }
 
-export async function searchVideos(query, apiKey, { maxResults = 16 } = {}) {
-  const searchData = await apiFetch(
-    "search",
-    { part: "snippet", type: "video", q: query, maxResults },
-    apiKey
-  );
-
-  const ids = (searchData.items || [])
-    .map((it) => it.id?.videoId)
-    .filter(Boolean);
-
-  if (ids.length === 0) return [];
-
-  const detailsData = await apiFetch(
-    "videos",
-    { part: "snippet,contentDetails,statistics", id: ids.join(",") },
-    apiKey
-  );
-
-  return (detailsData.items || []).map((item) => ({
+function mapVideoItem(item) {
+  return {
     id: item.id,
     title: item.snippet.title,
     description: item.snippet.description,
@@ -75,7 +58,55 @@ export async function searchVideos(query, apiKey, { maxResults = 16 } = {}) {
       "",
     durationSeconds: isoDurationToSeconds(item.contentDetails?.duration),
     viewCount: item.statistics?.viewCount,
-  }));
+  };
+}
+
+/**
+ * @returns {Promise<object|null>} null si no existe ningún vídeo con ese ID.
+ */
+export async function getVideoById(videoId, apiKey) {
+  const data = await apiFetch(
+    "videos",
+    { part: "snippet,contentDetails,statistics", id: videoId },
+    apiKey
+  );
+  const item = data.items?.[0];
+  return item ? mapVideoItem(item) : null;
+}
+
+/**
+ * Extrae el ID de vídeo de YouTube de un texto pegado por el usuario: puede
+ * ser una URL completa (youtube.com/watch, youtu.be, shorts, live,
+ * music.youtube.com…) o directamente el ID de 11 caracteres.
+ * @returns {string|null}
+ */
+export function extractVideoId(text) {
+  if (!text) return null;
+  const trimmed = text.trim();
+
+  if (/^[\w-]{11}$/.test(trimmed)) return trimmed;
+
+  let url;
+  try {
+    url = new URL(trimmed);
+  } catch {
+    return null;
+  }
+
+  const host = url.hostname.replace(/^(www|m|music)\./, "");
+
+  if (host === "youtu.be") {
+    return url.pathname.slice(1).split("/")[0] || null;
+  }
+
+  if (host === "youtube.com") {
+    const v = url.searchParams.get("v");
+    if (v) return v;
+    const match = /^\/(shorts|live|embed)\/([\w-]{11})/.exec(url.pathname);
+    if (match) return match[2];
+  }
+
+  return null;
 }
 
 export { YouTubeApiError };

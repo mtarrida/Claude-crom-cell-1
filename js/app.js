@@ -1,17 +1,16 @@
 import { initSettingsDialog, getSettings } from "./settings.js";
-import { searchVideos, formatDuration, YouTubeApiError } from "./youtube.js";
+import { getVideoById, extractVideoId, formatDuration, YouTubeApiError } from "./youtube.js";
 import { fetchTranscript, cuesToTimestampedText } from "./transcript.js";
 import { summarizeVideo, SummarizeError } from "./summarize.js";
 import { initSplit } from "./split.js";
 import { mountPlayer, seekTo, destroyPlayer } from "./player.js";
 
 // ---------- DOM refs ----------
-const searchForm = document.getElementById("search-form");
-const searchInput = document.getElementById("search-input");
-const resultsView = document.getElementById("results-view");
-const resultsGrid = document.getElementById("results-grid");
-const resultsHint = document.getElementById("results-hint");
-const resultsStatus = document.getElementById("results-status");
+const homeView = document.getElementById("home-view");
+const pasteBtn = document.getElementById("paste-btn");
+const homeStatus = document.getElementById("home-status");
+const manualLinkForm = document.getElementById("manual-link-form");
+const manualLinkInput = document.getElementById("manual-link-input");
 
 const videoView = document.getElementById("video-view");
 const backBtn = document.getElementById("back-btn");
@@ -53,53 +52,72 @@ initSettingsDialog();
 // ---------- split panel ----------
 initSplit({ container: splitContainer, divider });
 
-// ---------- search ----------
-searchForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const query = searchInput.value.trim();
-  if (!query) return;
-
+// ---------- home: pegar enlace y analizar ----------
+pasteBtn.addEventListener("click", async () => {
   const { ytApiKey } = getSettings();
   if (!ytApiKey) {
-    setStatus(resultsStatus, "Falta la clave de la YouTube Data API. Ábrela desde Ajustes ⚙️.", { error: true });
+    setStatus(homeStatus, "Falta la clave de la YouTube Data API. Ábrela desde Ajustes ⚙️.", { error: true });
     document.getElementById("settings-btn").click();
     return;
   }
 
-  resultsHint.hidden = true;
-  resultsGrid.innerHTML = "";
-  setStatus(resultsStatus, "Buscando…");
+  manualLinkForm.hidden = true;
+  setStatus(homeStatus, "Leyendo portapapeles…");
 
+  let text = "";
   try {
-    const results = await searchVideos(query, ytApiKey);
-    if (results.length === 0) {
-      setStatus(resultsStatus, "Sin resultados para esa búsqueda.");
-      return;
-    }
-    setStatus(resultsStatus, "", { hidden: true });
-    renderResults(results);
+    text = await navigator.clipboard.readText();
   } catch (err) {
-    const msg = err instanceof YouTubeApiError ? err.message : "Error al buscar en YouTube.";
-    setStatus(resultsStatus, msg, { error: true });
     console.error(err);
+    setStatus(
+      homeStatus,
+      "No se pudo leer el portapapeles automáticamente (permiso denegado o navegador no compatible). Pega el enlace a mano.",
+      { error: true }
+    );
+    manualLinkForm.hidden = false;
+    manualLinkInput.focus();
+    return;
   }
+
+  await analyzeLink(text);
 });
 
-function renderResults(videos) {
-  resultsGrid.innerHTML = "";
-  for (const video of videos) {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = "result-card";
-    card.innerHTML = `
-      <img src="${video.thumbnail}" alt="" loading="lazy" />
-      <div class="card-body">
-        <p class="card-title">${escapeHtml(video.title)}</p>
-        <p class="card-meta">${escapeHtml(video.channelTitle)} · ${formatDuration(video.durationSeconds)}</p>
-      </div>
-    `;
-    card.addEventListener("click", () => openVideo(video));
-    resultsGrid.appendChild(card);
+manualLinkForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  await analyzeLink(manualLinkInput.value);
+});
+
+async function analyzeLink(text) {
+  const videoId = extractVideoId(text);
+  if (!videoId) {
+    setStatus(homeStatus, "Eso no parece un enlace de YouTube válido.", { error: true });
+    manualLinkForm.hidden = false;
+    return;
+  }
+
+  const { ytApiKey } = getSettings();
+  if (!ytApiKey) {
+    setStatus(homeStatus, "Falta la clave de la YouTube Data API. Ábrela desde Ajustes ⚙️.", { error: true });
+    document.getElementById("settings-btn").click();
+    return;
+  }
+
+  setStatus(homeStatus, "Cargando datos del vídeo…");
+
+  try {
+    const video = await getVideoById(videoId, ytApiKey);
+    if (!video) {
+      setStatus(homeStatus, "No se encontró ningún vídeo con ese enlace.", { error: true });
+      return;
+    }
+    setStatus(homeStatus, "", { hidden: true });
+    manualLinkForm.hidden = true;
+    manualLinkInput.value = "";
+    openVideo(video);
+  } catch (err) {
+    const msg = err instanceof YouTubeApiError ? err.message : "Error al consultar YouTube.";
+    setStatus(homeStatus, msg, { error: true });
+    console.error(err);
   }
 }
 
@@ -113,11 +131,11 @@ function escapeHtml(str) {
 backBtn.addEventListener("click", () => {
   destroyPlayer();
   videoView.hidden = true;
-  resultsView.hidden = false;
+  homeView.hidden = false;
 });
 
 async function openVideo(video) {
-  resultsView.hidden = true;
+  homeView.hidden = true;
   videoView.hidden = false;
   videoTitleEl.textContent = video.title;
 

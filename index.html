@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>YT Analyzer</title>
-  <meta name="description" content="Busca vídeos de YouTube y obtén un resumen y capítulos generados con IA." />
+  <meta name="description" content="Pega un enlace de YouTube y obtén un resumen y capítulos generados con IA." />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>" />
   <link rel="stylesheet" href="css/styles.css" />
 </head>
@@ -15,21 +15,26 @@
         <span class="brand-icon" aria-hidden="true">🎬</span>
         <h1>YT Analyzer</h1>
       </div>
-      <form id="search-form" autocomplete="off">
-        <input id="search-input" type="search" placeholder="Buscar vídeos en YouTube…" aria-label="Buscar vídeos" />
-        <button type="submit" id="search-btn">Buscar</button>
-      </form>
       <button id="settings-btn" type="button" title="Ajustes / claves de API" aria-label="Ajustes">⚙️</button>
     </header>
 
-    <main id="results-view">
-      <p id="results-hint" class="hint">Introduce una búsqueda para ver resultados de YouTube.</p>
-      <p id="results-status" class="status" hidden></p>
-      <div id="results-grid" class="results-grid"></div>
+    <main id="home-view">
+      <button id="paste-btn" type="button" class="paste-btn">📋 Analizar vídeo del portapapeles</button>
+      <p id="home-status" class="status" hidden></p>
+
+      <form id="manual-link-form" class="manual-link-form" hidden autocomplete="off">
+        <input id="manual-link-input" type="text" inputmode="url" placeholder="Pega aquí el enlace de YouTube…" aria-label="Enlace de YouTube" />
+        <button type="submit">Analizar</button>
+      </form>
+
+      <p class="hint">
+        Copia el enlace de un vídeo de YouTube y toca el botón. Si el navegador no te deja
+        leer el portapapeles automáticamente, te dejará pegarlo a mano.
+      </p>
     </main>
 
     <main id="video-view" hidden>
-      <button id="back-btn" type="button">← Volver a resultados</button>
+      <button id="back-btn" type="button">← Analizar otro vídeo</button>
       <h2 id="video-title" class="video-title"></h2>
 
       <div id="split-container" class="split-container">
