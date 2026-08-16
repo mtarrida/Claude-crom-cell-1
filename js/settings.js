@@ -1,28 +1,28 @@
 // Gestión de ajustes: claves de API guardadas SOLO en localStorage del navegador.
-// Nunca se envían a ningún sitio salvo directamente a Google / Anthropic.
+// Nunca se envían a ningún sitio salvo directamente a Google (YouTube y Gemini).
 
 const KEYS = {
   yt: "yta.ytApiKey",
-  anthropic: "yta.anthropicApiKey",
+  gemini: "yta.geminiApiKey",
   model: "yta.model",
   proxy: "yta.corsProxy",
 };
 
 export const DEFAULT_PROXY = "https://api.allorigins.win/raw?url=";
-export const DEFAULT_MODEL = "claude-haiku-4-5-20251001";
+export const DEFAULT_MODEL = "gemini-2.5-flash";
 
 export function getSettings() {
   return {
     ytApiKey: localStorage.getItem(KEYS.yt) || "",
-    anthropicApiKey: localStorage.getItem(KEYS.anthropic) || "",
+    geminiApiKey: localStorage.getItem(KEYS.gemini) || "",
     model: localStorage.getItem(KEYS.model) || DEFAULT_MODEL,
     corsProxy: localStorage.getItem(KEYS.proxy) || DEFAULT_PROXY,
   };
 }
 
-export function saveSettings({ ytApiKey, anthropicApiKey, model, corsProxy }) {
+export function saveSettings({ ytApiKey, geminiApiKey, model, corsProxy }) {
   localStorage.setItem(KEYS.yt, ytApiKey?.trim() || "");
-  localStorage.setItem(KEYS.anthropic, anthropicApiKey?.trim() || "");
+  localStorage.setItem(KEYS.gemini, geminiApiKey?.trim() || "");
   localStorage.setItem(KEYS.model, model || DEFAULT_MODEL);
   localStorage.setItem(KEYS.proxy, corsProxy?.trim() || DEFAULT_PROXY);
 }
@@ -31,15 +31,15 @@ export function hasYouTubeKey() {
   return !!getSettings().ytApiKey;
 }
 
-export function hasAnthropicKey() {
-  return !!getSettings().anthropicApiKey;
+export function hasGeminiKey() {
+  return !!getSettings().geminiApiKey;
 }
 
 export function initSettingsDialog({ onSaved } = {}) {
   const dialog = document.getElementById("settings-dialog");
   const form = document.getElementById("settings-form");
   const ytInput = document.getElementById("yt-key-input");
-  const anthropicInput = document.getElementById("anthropic-key-input");
+  const geminiInput = document.getElementById("gemini-key-input");
   const modelSelect = document.getElementById("model-select");
   const proxyInput = document.getElementById("proxy-input");
   const openBtn = document.getElementById("settings-btn");
@@ -48,7 +48,7 @@ export function initSettingsDialog({ onSaved } = {}) {
   function fillFromStorage() {
     const s = getSettings();
     ytInput.value = s.ytApiKey;
-    anthropicInput.value = s.anthropicApiKey;
+    geminiInput.value = s.geminiApiKey;
     modelSelect.value = s.model;
     proxyInput.value = s.corsProxy;
   }
@@ -64,7 +64,7 @@ export function initSettingsDialog({ onSaved } = {}) {
     e.preventDefault();
     saveSettings({
       ytApiKey: ytInput.value,
-      anthropicApiKey: anthropicInput.value,
+      geminiApiKey: geminiInput.value,
       model: modelSelect.value,
       corsProxy: proxyInput.value,
     });

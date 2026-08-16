@@ -1,11 +1,9 @@
-// Genera resumen + capítulos llamando directamente a la API de Claude
-// (Anthropic) desde el navegador, usando la clave que el usuario introduce
-// en Ajustes. Requiere el header "anthropic-dangerous-direct-browser-access"
-// porque, por diseño, la API de Anthropic bloquea peticiones cross-origin
-// salvo que se indique explícitamente (uso previsto para prototipos como este).
+// Genera resumen + capítulos llamando directamente a la API de Gemini
+// (Google AI Studio) desde el navegador, usando la clave que el usuario
+// introduce en Ajustes. La API de Gemini admite llamadas cross-origin con
+// la clave como query param, así que no hace falta ningún header especial.
 
-const ANTHROPIC_URL = "https://api.anthropic.com/v1/messages";
-const ANTHROPIC_VERSION = "2023-06-01";
+const GEMINI_URL_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
 class SummarizeError extends Error {}
 
@@ -51,26 +49,22 @@ ${transcriptText}
  */
 export async function summarizeVideo({ apiKey, model, title, description, transcriptText }) {
   if (!apiKey) {
-    throw new SummarizeError("Falta la clave de API de Anthropic. Ábrela desde Ajustes ⚙️.");
+    throw new SummarizeError("Falta la clave de API de Gemini. Ábrela desde Ajustes ⚙️.");
   }
 
-  const res = await fetch(ANTHROPIC_URL, {
+  const url = `${GEMINI_URL_BASE}/${model}:generateContent?key=${encodeURIComponent(apiKey)}`;
+
+  const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": ANTHROPIC_VERSION,
-      "anthropic-dangerous-direct-browser-access": "true",
-    },
+    headers: { "content-type": "application/json" },
     body: JSON.stringify({
-      model,
-      max_tokens: 2000,
-      messages: [{ role: "user", content: buildPrompt({ title, description, transcriptText }) }],
+      contents: [{ role: "user", parts: [{ text: buildPrompt({ title, description, transcriptText }) }] }],
+      generationConfig: { responseMimeType: "application/json" },
     }),
   });
 
   if (!res.ok) {
-    let message = `Error ${res.status} llamando a la API de Anthropic`;
+    let message = `Error ${res.status} llamando a la API de Gemini`;
     try {
       const body = await res.json();
       message = body?.error?.message || message;
@@ -81,7 +75,7 @@ export async function summarizeVideo({ apiKey, model, title, description, transc
   }
 
   const data = await res.json();
-  const rawText = data?.content?.find((b) => b.type === "text")?.text || "";
+  const rawText = data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
   const jsonText = stripCodeFence(rawText);
 
   let parsed;

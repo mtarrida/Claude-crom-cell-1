@@ -60,8 +60,8 @@
         <h2>Ajustes</h2>
         <p class="dialog-hint">
           Estas claves se guardan solo en este navegador (localStorage) y se usan para llamar
-          directamente a las APIs de Google y Anthropic desde tu dispositivo. No se suben al repositorio.
-          Usa claves restringidas (por referrer HTTP) cuando puedas.
+          directamente a las APIs de Google (YouTube y Gemini) desde tu dispositivo. No se suben al repositorio.
+          Usa claves restringidas cuando puedas.
         </p>
 
         <label for="yt-key-input">Clave YouTube Data API v3</label>
@@ -71,16 +71,16 @@
           habilita "YouTube Data API v3".
         </p>
 
-        <label for="anthropic-key-input">Clave API de Anthropic (Claude)</label>
-        <input id="anthropic-key-input" type="text" placeholder="sk-ant-…" autocomplete="off" />
+        <label for="gemini-key-input">Clave API de Gemini (Google AI Studio)</label>
+        <input id="gemini-key-input" type="text" placeholder="AIza…" autocomplete="off" />
         <p class="field-hint">
-          Créala en <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noopener">console.anthropic.com</a>.
+          Créala gratis en <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener">aistudio.google.com/apikey</a>.
         </p>
 
         <label for="model-select">Modelo para resumen/capítulos</label>
         <select id="model-select">
-          <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 (rápido y económico)</option>
-          <option value="claude-sonnet-5">Claude Sonnet 5 (más calidad)</option>
+          <option value="gemini-2.5-flash">Gemini 2.5 Flash (rápido y económico)</option>
+          <option value="gemini-2.5-pro">Gemini 2.5 Pro (más calidad)</option>
         </select>
 
         <label for="proxy-input">Proxy CORS (para leer subtítulos de YouTube)</label>

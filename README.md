@@ -24,10 +24,10 @@ Todo corre **en tu navegador**, no hay servidor propio:
   reintenta a través de un proxy CORS configurable (por defecto
   `api.allorigins.win`, cambiable en Ajustes ⚙️).
 - **Resumen y capítulos** → se llama directamente desde el navegador a la
-  [API de Claude (Anthropic)](https://docs.anthropic.com/) con la
+  [API de Gemini (Google AI Studio)](https://ai.google.dev/) con la
   transcripción como contexto.
 
-Las claves de API (YouTube y Anthropic) se introducen una vez desde el
+Las claves de API (YouTube y Gemini) se introducen una vez desde el
 icono ⚙️ y se guardan **solo en `localStorage` de tu navegador**. Nunca se
 suben al repositorio ni pasan por ningún servidor intermedio propio.
 
@@ -48,8 +48,8 @@ serverless que use la API de Whisper/AssemblyAI/Deepgram).
   [Google Cloud Console](https://console.cloud.google.com/apis/credentials),
   habilita "YouTube Data API v3" y genera una clave de API. Restríngela
   por *referrer HTTP* a tu dominio de GitHub Pages cuando lo tengas.
-- **Anthropic (Claude)**: genera una clave en
-  [console.anthropic.com](https://console.anthropic.com/settings/keys).
+- **Gemini (Google AI Studio)**: genera una clave gratis en
+  [aistudio.google.com/apikey](https://aistudio.google.com/apikey) (sin tarjeta).
 
 Ambas se configuran desde el botón ⚙️ dentro de la propia app, no hace
 falta tocar código.
@@ -89,7 +89,7 @@ css/styles.css         Estilos (claro/oscuro automático, layout responsive)
 js/settings.js         Ajustes y claves de API (localStorage)
 js/youtube.js          Búsqueda y detalle de vídeos (YouTube Data API v3)
 js/transcript.js        Extracción de subtítulos/transcripción
-js/summarize.js         Resumen + capítulos vía API de Claude
+js/summarize.js         Resumen + capítulos vía API de Gemini
 js/player.js             Reproductor embebido (YouTube IFrame API) + seek
 js/split.js               Panel divisor arrastrable (ratón/táctil/teclado)
 js/app.js                  Orquestador principal
