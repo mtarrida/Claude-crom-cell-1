@@ -44,12 +44,15 @@ export async function mountPlayer(mountElement, videoId) {
   const inner = document.createElement("div");
   mountElement.appendChild(inner);
 
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     currentPlayer = new YT.Player(inner, {
       videoId,
       playerVars: { rel: 0, playsinline: 1 },
       events: {
         onReady: () => resolve(currentPlayer),
+        // p. ej. error 153: la página no se sirve por http(s) (archivo local),
+        // o el vídeo no permite embeberse. No bloqueamos el resto de la app.
+        onError: (e) => reject(new Error(`YouTube player error ${e?.data}`)),
       },
     });
   });

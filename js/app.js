@@ -125,7 +125,12 @@ async function openVideo(video) {
   chaptersList.innerHTML = "";
   setStatus(analysisStatus, "", { hidden: true });
 
-  await mountPlayer(document.getElementById("player-wrap"), video.id);
+  // No bloqueamos el resumen/capítulos si el reproductor embebido falla
+  // (p. ej. Error 153 al abrir la app como archivo local sin servidor,
+  // donde YouTube no permite el iframe) — el análisis no depende del player.
+  mountPlayer(document.getElementById("player-wrap"), video.id).catch((err) => {
+    console.error("No se pudo montar el reproductor:", err);
+  });
 
   const cached = loadAnalysisCache(video.id);
   if (cached) {
