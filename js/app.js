@@ -185,11 +185,7 @@ async function runAnalysis(video) {
   } catch (err) {
     console.error(err);
     summaryText.textContent = "No se pudo comprobar si el vídeo tiene subtítulos.";
-    setStatus(
-      analysisStatus,
-      "Fallo al leer la página del vídeo (puede que el proxy CORS esté caído). Prueba a cambiarlo en Ajustes ⚙️.",
-      { error: true }
-    );
+    setStatus(analysisStatus, err.message || "Fallo al leer la página del vídeo.", { error: true });
     return;
   }
 
